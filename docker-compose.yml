@@ -1,0 +1,49 @@
+version: "2.4"
+
+services:
+    web:
+        image: "${ODOO_IMAGE}:latest"
+        extends:
+            file: docker-compose-common.yml
+            service: web
+        stdin_open: true
+        ports:
+            - "${ODOO_PORT}069:8069"
+            - "${ODOO_PORT}072:8072"
+        build:
+            args:
+                AGGREGATE: "false"
+                PIP_INSTALL_ODOO: "false"
+                COMPILE: "false"
+        environment:
+            PYTHONOPTIMIZE: ""
+            WITHOUT_DEMO: "False"
+            PROXY_MODE:  "False"
+            LIST_DB: "True"
+        volumes:
+            - ${WORKDIR}:/opt/odoo/custom/src:ro,z
+            - ./odoo/auto/addons:/opt/odoo/auto/addons:rw,z
+        depends_on:
+            - db
+        networks: &public
+            default:
+            public:
+        # command:
+        #     - odoo
+        #     - --dev=xml
+    db:
+        extends:
+            file: docker-compose-common.yml
+            service: db
+        ports:
+            - "15432:5432"
+        environment:
+            POSTGRES_PASSWORD: "$DB_PASSWORD"
+networks:
+    default:
+        name: "${ODOO_IMAGE}_default"
+        internal: true
+    public:
+volumes:
+    filestore:
+    db:

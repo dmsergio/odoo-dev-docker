@@ -1,0 +1,34 @@
+version: "2.4"
+
+services:
+    web:
+        container_name: "${ODOO_IMAGE}_web"
+        build:
+            context: ./odoo
+            args:
+                ODOO_VERSION: $ODOO_VERSION
+                CLEAN: "false"
+        environment:
+            ADMIN_PASSWORD: "$ODOO_ADMIN_PASSWORD"
+            PGDATABASE: $PGDATABASE
+            INITIAL_LANG: "$INITIAL_LANG"
+            PGPASSWORD: "$DB_PASSWORD"
+            PGUSER: "$DB_USER"
+            DB_FILTER: "$DB_FILTER"
+            CONF_WORKERS: "$WORKERS"
+            CONF_SERVER_WIDE_MODULES: "$SERVER_WIDE_MODULES"
+            CONF_CONNECTOR_CHANNELS: "$CONNECTOR_CHANNELS"
+        tty: true
+        volumes:
+            - filestore:/var/lib/odoo:z
+
+    db:
+        container_name: "${ODOO_IMAGE}_db"
+        image: postgres:${DB_VERSION}-alpine
+        environment:
+            POSTGRES_USER: "$DB_USER"
+            POSTGRES_PASSWORD: "$DB_PASSWORD"
+            CONF_EXTRA: |
+                work_mem = 32MB
+        volumes:
+            - db:/var/lib/postgresql/data:z
