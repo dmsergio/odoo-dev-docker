@@ -1,0 +1,12 @@
+# addons to load when Odoo server starts
+connector:
+    - "*"
+queue:
+    - "*"
+server-ux:
+    - "*"
+server-tools:
+    - "*"
+web:
+    - "*"
+# our personal repositories and addons

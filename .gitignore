@@ -1,2 +1,5 @@
 .idea
 .env
+odoo/auto/addons/*
+!odoo/auto/addons/.empty
+odoo/custom/src

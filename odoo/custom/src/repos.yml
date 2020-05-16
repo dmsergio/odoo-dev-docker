@@ -1,0 +1,63 @@
+# Odoo is always required
+./odoo:
+    defaults:
+        depth: $DEPTH_DEFAULT
+    remotes:
+        origin: https://github.com/OCA/OCB.git
+    target:
+        origin $ODOO_VERSION
+    merges:
+        - origin $ODOO_VERSION
+
+# OCA repositories
+./server-tools:
+    defaults:
+        depth: $DEPTH_DEFAULT
+    remotes:
+        origin: https://github.com/OCA/server-tools
+    target:
+        origin $ODOO_VERSION
+    merges:
+        - origin $ODOO_VERSION
+
+./connector:
+    defaults:
+        depth: $DEPTH_DEFAULT
+    remotes:
+        origin: https://github.com/OCA/connector
+    target:
+        origin $ODOO_VERSION
+    merges:
+        - origin $ODOO_VERSION
+
+./queue:
+    defaults:
+        depth: $DEPTH_DEFAULT
+    remotes:
+        origin: https://github.com/OCA/queue
+    target:
+        origin $ODOO_VERSION
+    merges:
+        - origin $ODOO_VERSION
+
+./web:
+    defaults:
+        depth: $DEPTH_DEFAULT
+    remotes:
+        origin: https://github.com/OCA/web
+    target:
+        origin $ODOO_VERSION
+    merges:
+        - origin $ODOO_VERSION
+
+./server-ux:
+    defaults:
+        depth: $DEPTH_DEFAULT
+    remotes:
+        origin: https://github.com/OCA/server-ux
+    target:
+        origin $ODOO_VERSION
+    merges:
+        - origin $ODOO_VERSION
+
+# Our personal projects will be here

@@ -1,0 +1,176 @@
+#!/bin/bash
+
+set -a
+source "/Users/sergio/Projects/odoo_dev_docker/.env"
+
+ARG_UPDATE=
+ARG_GIT=0
+ARG_RELOAD=0
+ARG_DEPTH=1
+ARG_BRANCH=${ODOO_VERSION}
+ARG_TAG=${TAG}
+ARG_IMG=${ODOO_IMAGE}
+ARG_DB=${PGDATABASE}
+ARG_DEVEL_DIR=${WORKDIR}
+
+
+
+print_help () {
+    >&2 cat <<EOF
+Usage:
+  ${SCRIPTNAME} [-v] -d DB -u MÓDULOS [-t TAG]
+
+Arguments:
+  -i, --img          imagen de Odoo para crear el contenedor (def: ${ARG_IMG})
+  -t, --tag          tag de la imagen: devel, prod, test (def: ${ARG_TAG})
+  -D, --devel-dir    Directorio de trabajo, (def: ${ARG_DEVEL_DIR})
+  -d, --db           Nombre de la base de datos. Necesario si --update, (def: ${ARG_DB})
+
+  -g, --git          Actualiza / Descarga los repositorios de git configurados en el fichero repos.yaml
+  -u, --update       módulos a actualizar
+
+  -b, --branch       Rama para repositorios internos. Necesario si --git (def: ${ARG_BRANCH})
+  --depth            Dependencias descargadas de git (solo con --git, def: ${ARG_DEPTH})
+
+  --reload           Reinicia el contenedor
+  --all              Equivalente a poner  --git --update all --reload
+
+  -h, --help         muestra esta ayuda y finaliza
+
+Example:
+  ${SCRIPTNAME} -i ${ARG_IMG} -t ${ARG_TAG} -D ${ARG_DEVEL_DIR} -b ${ARG_BRANCH} --git --reload
+  ${SCRIPTNAME} -i ${ARG_IMG} -t ${ARG_TAG} -D ${ARG_DEVEL_DIR} -b ${ARG_BRANCH} -d ${ARG_DB} --git -u sale,account
+  ${SCRIPTNAME} -i ${ARG_IMG} -t ${ARG_TAG} -D ${ARG_DEVEL_DIR} -b ${ARG_BRANCH} -d ${ARG_DB} --all
+
+EOF
+    exit 1
+}
+
+while [[ ${#} -gt 0 ]]; do
+    case "${1}" in
+        -D|--devel-dir)
+            [[ -z "${2}" || "${2}" == -* ]] && print_help
+            ARG_DEVEL_DIR="${2}"
+            shift
+            ;;
+        -i|--img)
+            [[ -z "${2}" || "${2}" == -* ]] && print_help
+            ARG_IMG="${2}"
+            shift
+            ;;
+        -t|--tag)
+            [[ -z "${2}" || "${2}" == -* ]] && print_help
+            ARG_TAG="${2}"
+            shift
+            ;;
+        -u|--update)
+            [[ -z "${2}" || "${2}" == -* ]] && print_help
+            ARG_UPDATE="${2}"
+            shift
+            ;;
+        -d|--db)
+            [[ -z "${2}" || "${2}" == -* ]] && print_help
+            ARG_DB="${2}"
+            shift
+            ;;
+        -b|--branch)
+            [[ -z "${2}" || "${2}" == -* ]] && print_help
+            ARG_BRANCH="${2}"
+            shift
+            ;;
+        --depth)
+            [[ -z "${2}" || "${2}" == -* ]] && print_help
+            ARG_UPDATE="${2}"
+            shift
+            ;;
+        -g|--git)
+            ARG_GIT=1
+            ;;
+        --reload)
+            ARG_RELOAD=1
+            ;;
+        --all)
+            ARG_GIT=1
+            ARG_UPDATE=all
+            ARG_RELOAD=1
+            ;;
+        -h|--help)
+            print_help
+            ;;
+        *)
+            >&2 echo '[ERROR] unknown arg: ${1}'
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+[[ -z "${ARG_IMG}" ]] && print_help
+[[ -z "${ARG_TAG}" ]] && print_help
+[[ "${ARG_TAG}" == "devel" && -z "${ARG_DEVEL_DIR}" ]] && print_help
+if [[ -n "${ARG_UPDATE}" && -z "${ARG_DB}" ]]; then
+    echo "No se ha especificado la base de datos, imposible actualizar"
+    print_help
+fi
+
+IMAGE="${ARG_IMG}:${ARG_TAG}"
+NET="${ARG_IMG}_default"
+
+if [[ "${ARG_TAG}" != "prod" ]]; then
+    if [[ "${ARG_GIT}" -eq 1 ]]; then
+        docker run --rm -it \
+            --volume ~/.ssh:/root/.ssh \
+            --volume "${ARG_DEVEL_DIR}":/opt/odoo/custom/src:rw,z \
+            --env DEPTH_DEFAULT=$ARG_DEPTH \
+            --env UID=$(id -u) \
+            --env GID=$(id -g) \
+            --env UMASK=$(umask) \
+            --env ODOO_VERSION=$ARG_BRANCH \
+            --user root \
+            --entrypoint autoaggregate \
+                "${IMAGE}"
+    fi
+    if [[ -n "${ARG_UPDATE}" && -n "${ARG_DB}" ]]; then
+        docker run --rm -it \
+            --volume "${ARG_DEVEL_DIR}":/opt/odoo/custom/src:rw,z \
+            --env PGDATABASE=$ARG_DB \
+            --net "${NET}" \
+                "${IMAGE}" odoo \
+                    --database "${ARG_DB}" \
+                    --update "${ARG_UPDATE}" \
+                    --no-xmlrpc \
+                    --workers 0 \
+                    --max-cron-threads 0 \
+                    --stop-after-init
+    fi
+else
+    if [[ "${ARG_GIT}" -eq 1 ]]; then
+        docker run --rm -it \
+            --env DEPTH_DEFAULT=$ARG_DEPTH \
+            --env ODOO_VERSION=$ARG_BRANCH \
+            --user root \
+            --entrypoint autoaggregate \
+                "${IMAGE}"
+    fi
+    if [[ -n "${ARG_UPDATE}" && -n "${ARG_DB}" ]]; then
+        docker run --rm -it \
+            --env PGDATABASE=$ARG_DB \
+            --net "${NET}" \
+                "${IMAGE}" odoo \
+                    --database "${ARG_DB}" \
+                    --update "${ARG_UPDATE}" \
+                    --no-xmlrpc \
+                    --workers 0 \
+                    --max-cron-threads 0 \
+                    --stop-after-init
+    fi
+fi
+
+
+if [[ "${ARG_RELOAD}"  -eq 1 ]]; then
+    docker restart ${ARG_IMG}
+fi
+
+set +a
+echo "[INFO] Run time: $(date -d@${SECONDS} -u +%H:%M:%S)"
+echo '[INFO] Done!'
