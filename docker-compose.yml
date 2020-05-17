@@ -2,7 +2,7 @@ version: "2.4"
 
 services:
     web:
-        image: "${ODOO_IMAGE}:${TAG}"
+        image: "${ODOO_IMAGE}:${ODOO_VERSION}"
         extends:
             file: docker-compose-common.yml
             service: web

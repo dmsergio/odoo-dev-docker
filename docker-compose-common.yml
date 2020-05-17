@@ -2,7 +2,7 @@ version: "2.4"
 
 services:
     web:
-        container_name: "${ODOO_IMAGE}_web"
+        container_name: "${ODOO_IMAGE}_${ODOO_PORT}_web"
         build:
             context: ./odoo
             args:
@@ -23,7 +23,7 @@ services:
             - filestore:/var/lib/odoo:z
 
     db:
-        container_name: "${ODOO_IMAGE}_db"
+        container_name: "${ODOO_IMAGE}_${ODOO_PORT}_db"
         image: postgres:${DB_VERSION}-alpine
         environment:
             POSTGRES_USER: "$DB_USER"
