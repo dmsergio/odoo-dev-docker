@@ -3,7 +3,6 @@ zeep
 pymysql
 pyOpenSSL
 unidecode
-mysqlclient
 pydevd
 pdbpp
 pg_activity
