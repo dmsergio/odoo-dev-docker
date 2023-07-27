@@ -1,5 +1,11 @@
 .idea
 .env
+
+# folders
 odoo/auto/addons/*
-!odoo/auto/addons/.empty
+!odoo/auto/addons/.gitkeep
+
 odoo/custom/src
+
+docs/*
+!docs/.gitkeep
