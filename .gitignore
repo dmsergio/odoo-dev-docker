@@ -1,5 +1,6 @@
 .idea
 .env
+.DS_Store
 
 # folders
 odoo/auto/addons/*

@@ -39,11 +39,13 @@ services:
             - "15432:5432"
         environment:
             POSTGRES_PASSWORD: "$DB_PASSWORD"
+
 networks:
     default:
-        name: "${ODOO_IMAGE}_default"
+        name: "${ODOO_IMAGE}_${ODOO_PORT}_default"
         internal: true
     public:
+
 volumes:
     filestore:
     db:

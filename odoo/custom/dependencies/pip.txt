@@ -3,7 +3,6 @@ zeep
 pymysql
 pyOpenSSL
 unidecode
-pydevd
 pdbpp
 pg_activity
 git+https://github.com/OCA/openupgradelib.git@master
@@ -11,3 +10,4 @@ unicodecsv
 odoo-client-lib
 raven
 ipdb
+psycopg2-binary
