@@ -1,3 +1,9 @@
+build:
+	docker compose build
+
+build-nocache:
+	docker compose build --no-cache
+
 up:
 	docker compose up
 
