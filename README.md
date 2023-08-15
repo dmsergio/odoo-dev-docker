@@ -13,21 +13,23 @@ Docker to deploy Odoo development projects.
     cp ./template.env ./.env
     ```
 
-    The more important variables are:
+    You must to change the following variables:
 
-    - __ODOO_VERSION__: Version of your Odoo instance.
-    - __WORKDIR__: Absolute path to ./odoo/custom/src/ folder. For example: `/home/foo-user/projects/my-custom-odoo/odoo/custom/src`
+    - __ODOO_VERSION__: Version of your Odoo instance. E.g. 13.0, 14.0, 15.0, etc.
+    - __ODOO_PORT__: Port in order to access to Odoo instance. E.g. 13 will be '13069', 14 will be 14069, and so on.
+    - __WORKDIR__: Absolute path to ./odoo/custom/src/ folder. For example: `/home/foo-user/projects/my-custom-odoo/odoo/custom/src`.
+    - __DB_VERSION__: Postgres version to install.
 
 4. Build the image and run the services:
 
     ```shell
-    docker compose build --pull
-    docker compose up
+    make build
+    make up
     ```
 
     Or
     ```shell
-    docker compose up -d --build
+    make fast-up
     ```
 
-5. Open the instance in the web browser: http://localhost:<ODOO_PORT>
+5. Open the instance in the web browser: http://localhost:{ODOO_PORT}069

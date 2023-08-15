@@ -1,7 +1,14 @@
+# Shortcuts
+fast-up: build upd
+
+fast-run: upd logs-odoo
+
+
+# Manage Docker services
 build:
 	docker compose build
 
-build-nocache:
+build-no-cache:
 	docker compose build --no-cache
 
 up:
@@ -10,12 +17,17 @@ up:
 upd:
 	docker compose up -d
 
+ps:
+	docker compose ps
+
 down:
 	docker compose down
 
 down-orphans:
 	docker compose down --remove-orphans
 
+
+# Logs
 logs:
 	docker compose logs -f --tail 10
 
@@ -25,6 +37,8 @@ logs-odoo:
 logs-postgres:
 	docker compose logs db -f --tail 10
 
+
+# Odoo and Postgres commands
 odoo-shell:
 	docker compose exec web odoo shell -d ${database}
 
