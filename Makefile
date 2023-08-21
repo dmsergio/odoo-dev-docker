@@ -42,5 +42,8 @@ logs-postgres:
 odoo-shell:
 	docker compose exec web odoo shell -d ${database}
 
+odoo-update-addon:
+	docker compose exec web odoo -d ${database} -u ${addon} --stop-after-init
+
 psql:
 	docker compose exec db psql -U ${user} -d ${database}
